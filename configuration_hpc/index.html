@@ -1,0 +1,1242 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../access/alternatives/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+    
+    
+      
+        <title>Configuration on HPC systems - Best Practices for CernVM-FS in HPC</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuring-cernvm-fs-on-hpc-infrastructure" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Best Practices for CernVM-FS in HPC" class="md-header__button md-logo" aria-label="Best Practices for CernVM-FS in HPC" data-md-component="logo">
+      
+  <img src="../img/logos/cvmfs_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Best Practices for CernVM-FS in HPC
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration on HPC systems
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/multixscale/cvmfs-tutorial-hpc-best-practices" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Best Practices for CernVM-FS in HPC
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Best Practices for CernVM-FS in HPC" class="md-nav__button md-logo" aria-label="Best Practices for CernVM-FS in HPC" data-md-component="logo">
+      
+  <img src="../img/logos/cvmfs_logo.png" alt="logo">
+
+    </a>
+    Best Practices for CernVM-FS in HPC
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/multixscale/cvmfs-tutorial-hpc-best-practices" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Best Practices for CernVM-FS in HPC
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Introduction to CernVM-FS
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction to CernVM-FS
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cvmfs/what-is-cvmfs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What is CernVM-FS?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cvmfs/technical-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Technical details
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cvmfs/flagship-repositories/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Flagship repositories
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    EESSI
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            EESSI
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/what-is-eessi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    What is EESSI?
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/motivation-goals/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Motivation & goals
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/inspiration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Inspiration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/high-level-design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    High-level design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/using-eessi/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Using EESSI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../eessi/support/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting support
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Accessing repositories
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Accessing repositories
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access/client/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CernVM-FS client system
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access/proxy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Squid proxy server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access/stratum1/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Private Stratum 1 replica server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access/alternatives/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Alternative access methods
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Configuration on HPC systems
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Configuration on HPC systems
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#diskless-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Diskless worker nodes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Diskless worker nodes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory-client-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      In-memory client cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loopback-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loopback on shared filesystem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alien-cache-diskless" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alien cache
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#offline-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Offline worker nodes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Offline worker nodes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#squid-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      Squid proxy in local network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private-stratum1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private Stratum 1 replica server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alien-cache-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alien cache
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worker-nodes-without-cernvm-fs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker nodes without CernVM-FS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Worker nodes without CernVM-FS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-other-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syncing a to another filesystem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternative access mechanisms
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Performance aspects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../containers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Containers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Creating a CernVM-FS repository
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix/terminology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Appendix: Terminology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#diskless-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Diskless worker nodes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Diskless worker nodes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory-client-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      In-memory client cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loopback-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loopback on shared filesystem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alien-cache-diskless" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alien cache
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#offline-worker-nodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Offline worker nodes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Offline worker nodes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#squid-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      Squid proxy in local network
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private-stratum1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Private Stratum 1 replica server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alien-cache-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alien cache
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worker-nodes-without-cernvm-fs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker nodes without CernVM-FS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Worker nodes without CernVM-FS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sync-other-filesystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      Syncing a to another filesystem
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alternative access mechanisms
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="configuring-cernvm-fs-on-hpc-infrastructure">Configuring CernVM-FS on HPC infrastructure<a class="headerlink" href="#configuring-cernvm-fs-on-hpc-infrastructure" title="Permanent link">&para;</a></h1>
+<p>In the <a href="../access/">previous section</a> we have outlined how to set up a robust CernVM-FS infrastructure, by having a private Stratum 1 replica server and/or dedicated Squid proxy servers. While this approach will work for many HPC systems, some may have slightly more esoteric setups that require specific solutions, which we will discuss in this section.</p>
+<h2 id="diskless-worker-nodes">Diskless worker nodes<a class="headerlink" href="#diskless-worker-nodes" title="Permanent link">&para;</a></h2>
+<p>Some HPC systems may have worker nodes without any type of local disk, which is problematic for CernVM-FS since it uses a local cache on the worker nodes. Without this local cache, CernVM-FS can not store the repository content that is being accessed by users.</p>
+<p>A couple of workarounds are possible in this case:</p>
+<ul>
+<li><a href="#in-memory-cache">In-memory client cache</a></li>
+<li><a href="#loopback-filesystem">Loopback filesystem on a shared filesystem</a></li>
+<li><a href="#alien-cache-diskless">Alien cache</a></li>
+</ul>
+<h3 id="in-memory-client-cache">In-memory client cache<a class="headerlink" href="#in-memory-client-cache" title="Permanent link">&para;</a></h3>
+<p>An easy way to set up a client cache on diskless systems is to use a RAM disk like <code>/dev/shm</code>.</p>
+<p>It suffices to use a path like <code>/dev/shm/cvmfs-cache</code> (or equivalent) as the value for the <code>CVMFS_CACHE_BASE</code>
+configuration setting in <code>/etc/cvmfs/default.local</code>, along with setting <code>CVMFS_QUOTA_LIMIT</code> to
+the amount of memory that you would like to dedicate to the CernVM-FS client cache.</p>
+<p>For example:</p>
+<div class="copy highlight"><pre><span></span><code><span class="c1"># use max. 4GB of memory for CernVM-FS client cache</span>
+<span class="na">CVMFS_CACHE_BASE</span><span class="o">=</span><span class="s">/dev/shm/cvmfs-cache</span>
+<span class="na">CVMFS_QUOTA_LIMIT</span><span class="o">=</span><span class="s">4000</span>
+</code></pre></div>
+<p>Do not forget to apply the changes made by running:</p>
+<div class="copy highlight"><pre><span></span><code>sudo<span class="w"> </span>cvmfs_config<span class="w"> </span>reload
+</code></pre></div>
+<p>An obvious significant drawback of this is that less memory will be available to workloads running on the worker nodes,
+but it may be worth considering especially if enough memory is available in total.</p>
+<p>For general information on CernVM-FS cache settings, <a href="https://cvmfs.readthedocs.io/en/stable/cpt-configure.html#cache-settings">see the CernVM-FS
+documentation</a>.</p>
+<h3 id="loopback-filesystem">Loopback on shared filesystem<a class="headerlink" href="#loopback-filesystem" title="Permanent link">&para;</a></h3>
+<p>The generally recommended solution for diskless worker nodes is to use a <a href="https://en.wikipedia.org/wiki/Loop_device"><em>loopback
+filesystem</em></a> for the CernVM-FS client
+cache, which can be stored on the cluster's shared filesystem of the HPC cluster.
+Every worker node will need its own file in this case.</p>
+<p>This ensures that the parallelism of the shared file system can be exploited, while metadata accesses are performed
+within the loopback filesystems, and hence not overloading the shared filesystem's metadata server(s).</p>
+<p>The loopback filesystem files can be created using <code>dd</code> or <code>mkfs</code>. They should be formatted as an <code>ext3</code>, <code>ext4</code>,
+or <code>xfs</code> file system, and should be 15% larger than the cache size configured on the nodes (with <code>CVMFS_QUOTA_LIMIT</code>).</p>
+<p>On the worker nodes the loopback filesystem can be mounted from the shared file system, and they should be made
+available at the location specified in the <code>CVMFS_CACHE_BASE</code> configuration setting (or <code>/var/lib/cvmfs</code>, by default).</p>
+<h3 id="alien-cache-diskless">Alien cache<a class="headerlink" href="#alien-cache-diskless" title="Permanent link">&para;</a></h3>
+<p>An <em>alien cache</em> is a cache that is outside of the (full) control of CernVM-FS.</p>
+<p>In this scenario you store the cache on a shared filesystem, and have the CernVM-FS processes on all worker nodes
+use and fill it simultaneously. These processes can pull in the required files that are being accessed by users/jobs,
+or you can even manually <a href="https://cvmfs.readthedocs.io/en/stable/cpt-hpc.html#preloading-the-cernvm-fs-cache"><em>preload</em> the cache</a>.</p>
+<p>Using the alien cache still requires a very small local cache on the worker nodes for storing some control files.
+Given its size, you can store this local cache on a shared filesystem, or <a href="#in-memory-client-cache">in memory</a>.</p>
+<p>Compared to using a loopback filesystem described in the previous subsection, the drawback of storing the alien cache
+on your shared filesystem is that all metadata operations are now performed on the shared filesystem.
+Typically, this will result in a large number of metadata operations, and on many shared filesystems will be a significant bottleneck.</p>
+<p>For more information about an alien cache and configuring it, see the <a href="https://cvmfs.readthedocs.io/en/stable/cpt-configure.html#alien-cache">Alien Cache
+section</a> in the CernVM-FS documentation.</p>
+<h2 id="offline-worker-nodes">Offline worker nodes<a class="headerlink" href="#offline-worker-nodes" title="Permanent link">&para;</a></h2>
+<p>Another typical scenario for HPC systems is that worker nodes do not have (direct) access to the internet.</p>
+<p>In the context of CernVM-FS, this means that the clients running on the worker nodes are not be able to pull in files
+from (external) Stratum 1 replica servers.</p>
+<p>For this scenario, several solutions are available as well:</p>
+<ul>
+<li><a href="#squid-local">Squid proxy in local network</a></li>
+<li><a href="#private-stratum1">Private Stratum 1 replica server</a></li>
+<li><a href="#alien-cache-offline">Alien cache</a></li>
+</ul>
+<h3 id="squid-local">Squid proxy in local network<a class="headerlink" href="#squid-local" title="Permanent link">&para;</a></h3>
+<p>Setting up a <a href="../access/proxy/">Squid proxy server</a> in the internal network of the cluster, which is highly recommended regardless of whether
+the worker nodes are offline or not, will circumvent this issue since the worker nodes can be configured to only connect
+to Stratum 1 servers via the Squid proxy.</p>
+<p>This means that only the Squid proxy server requires internet access in order to fetch files from the Stratum 1 servers,
+while the clients will fetch the files from the proxy using the internal network.</p>
+<h3 id="private-stratum1">Private Stratum 1 replica server<a class="headerlink" href="#private-stratum1" title="Permanent link">&para;</a></h3>
+<p>Similar to having a Squid proxy in the internal network of the cluster, one could also opt for setting up a <a href="../access/stratum1/">private
+Stratum 1 replica server</a> that is accessible by the worker nodes, or even do both.</p>
+<p>Again, only the private Stratum 1 server needs to connect to the internet, as it will need to regularly synchronize
+with a <a href="http://127.0.0.1:8000/access/stratum1/#synchronisation-server">synchronisation server</a>.</p>
+<h3 id="alien-cache-offline">Alien cache<a class="headerlink" href="#alien-cache-offline" title="Permanent link">&para;</a></h3>
+<p>As a last resort, you can consider use an <a href="#alien-cache-diskless">alien cache</a> that is being prepopulated
+on a dedicated system outside of the HPC, which does have internet access.</p>
+<p>This alien cache can then be made available on the worker nodes, for instance by having it stored on the shared filesystem of the cluster.</p>
+<p>This is (again) not recommended however, for the same reason as before: this kind of setup will put significant load
+on the metadata server(s) of the shared filesystem.</p>
+<h2 id="worker-nodes-without-cernvm-fs">Worker nodes without CernVM-FS<a class="headerlink" href="#worker-nodes-without-cernvm-fs" title="Permanent link">&para;</a></h2>
+<p>The last scenario that we cover here is for HPC systems that do not have the CernVM-FS client component
+installed on the worker nodes, for example because the system administrators are not willing to install,
+configure, and maintain a CernVM-FS installation.</p>
+<p>Though less ideal than a native installaton of CernVM-FS, solutions to make CernVM-FS repositories accessible
+even in this case exist:</p>
+<ul>
+<li><a href="#sync-other-filesystem">Syncing a to another filesystem</a></li>
+<li><a href="#alternatives">Alternative access mechanisms</a></li>
+</ul>
+<h3 id="sync-other-filesystem">Syncing a to another filesystem<a class="headerlink" href="#sync-other-filesystem" title="Permanent link">&para;</a></h3>
+<p>A seemingly straightforward solution may be to synchronize (a part of) the contents of a CernVM-FS repository to
+another filesystem, and make that available on worker nodes.</p>
+<p>CernVM-FS provides the <a href="https://cvmfs.readthedocs.io/en/stable/cpt-shrinkwrap.html"><code>cvmfs_shrinkwrap</code> utility</a>
+exactly for this purpose.</p>
+<p>However, though the solution may sound easy, it has some severe disadvantages: <code>cvmfs_shrinkwrap</code> utility puts a
+heavy load on the server that is being used to pull in the contents, as it has to fetch all the contents
+(which may be a large amount of data) in one large bulk operation.</p>
+<p>In addition, the repository contents will have to be synchronized in some way, which involves rerunning this process
+regularly.</p>
+<p>Finally, this approach somewhat defeats the purpose of CernVM-FS, as you will be replacing a filesystem that is optimized for distributing software by one that most likely is not.</p>
+<h3 id="alternatives">Alternative access mechanisms<a class="headerlink" href="#alternatives" title="Permanent link">&para;</a></h3>
+<p>Alternative mechanisms to access CernVM-FS repositories exist that do not require system administrator privileges,
+so they can be leveraged by end users of HPC infrastructure.</p>
+<p>Examples include using a container runtime like <a href="https://apptainer.org">Apptainer</a>,
+or using <a href="https://github.com/cvmfs/cvmfsexec"><code>cvmfsexec</code></a>.</p>
+<p>For more details on these alternatives, see <a href="../access/alternatives/">Alternative ways to access CernVM-FS repositories</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Parrot connector to CernVM-FS</p>
+<p>While <a href="https://ccl.cse.nd.edu/software/parrot">Parrot</a> is still mentioned in the CernVM-FS documentation
+(see <a href="https://cvmfs.readthedocs.io/en/stable/cpt-configure.html#parrot-connector-to-cernvm-fs">here</a>),
+it is no longer recommended to use it, since better alternatives (like <code>cvmfsexec</code>) are available now.</p>
+</div>
+<hr />
+<p><em>(next: <a href="../troubleshooting/">Troubleshooting for CernVM-FS repositories</a>)</em></p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">December 3, 2023</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["instant"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      
+    
+  </body>
+</html>
